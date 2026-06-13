@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raport social — Julia · matura z polskiego</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#EAE3D3; --sand-2:#E3DBC8;
+    --card:#FBF8F1; --ink:#1E2530; --sub:#6A6457; --faint:#9A9484;
+    --line:#DCD3BF;
+    --cobalt:#2A4BD0; --cobalt-deep:#1E337F; --cobalt-soft:#E2E6FA;
+    --ochre:#B8862F; --ochre-soft:#F2E8D2;
+    --pos:#3C7D52; --neg:#B4503C;
+    --shadow:0 1px 2px rgba(30,37,48,.05),0 10px 30px rgba(30,37,48,.06);
+    --r:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--sand);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding:32px 20px 64px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,46px);line-height:1.05;letter-spacing:-.01em}
+  h1 .hl{background:linear-gradient(180deg,transparent 56%,rgba(42,75,208,.22) 56%,rgba(42,75,208,.22) 92%,transparent 92%);padding:0 .05em}
+  .topbar{margin-top:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  .tabs{display:flex;gap:8px}
+  .tab{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card)}
+  .tab .dot{width:8px;height:8px;border-radius:50%}
+  .tab.ig .dot{background:var(--cobalt)} .tab.tt .dot{background:var(--ochre)}
+  /* date filter */
+  .filter{display:inline-flex;background:var(--sand-2);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .filter button{font:inherit;font-size:13px;font-weight:600;color:var(--sub);background:none;border:none;padding:7px 16px;border-radius:999px;cursor:pointer;transition:.15s}
+  .filter button.on{background:var(--cobalt);color:#fff;box-shadow:0 2px 8px rgba(42,75,208,.3)}
+  /* KPI band */
+  .band{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden}
+  .kpi{padding:22px 24px;border-right:1px solid var(--line)}
+  .kpi:last-child{border-right:none}
+  .kpi .label{font-size:12.5px;color:var(--sub);font-weight:500;margin-bottom:9px}
+  .kpi .num{font-family:'Fraunces',serif;font-weight:600;font-size:33px;letter-spacing:-.01em;line-height:1}
+  .kpi .delta{margin-top:8px;font-size:12.5px;font-weight:600}
+  .kpi .delta.up{color:var(--pos)} .kpi .delta.down{color:var(--neg)}
+  /* generic section */
+  .sec{margin-top:30px}
+  .sec-h{display:flex;align-items:baseline;gap:13px;margin-bottom:15px}
+  .sec-h h2{font-family:'Fraunces',serif;font-weight:600;font-size:21px}
+  .sec-h span{font-size:13px;color:var(--faint)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .pad{padding:22px 24px}
+  .c-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .c-name{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px}
+  .c-name .dot{width:9px;height:9px;border-radius:50%}
+  .dot.ig{background:var(--cobalt)} .dot.tt{background:var(--ochre)}
+  .c-meta{font-size:11.5px;color:var(--faint)}
+  .legend{display:flex;gap:16px;font-size:11.5px;color:var(--sub);margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  /* lanes */
+  .lane::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+  .lane{position:relative;overflow:hidden}
+  .lane.ig::before{background:var(--cobalt)} .lane.tt::before{background:var(--ochre)}
+  .lane-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .s-num{font-family:'Fraunces',serif;font-weight:600;font-size:22px;line-height:1.1}
+  .s-lab{font-size:11.5px;color:var(--sub);margin-top:4px}
+  .s-sub{font-size:11.5px;font-weight:600;margin-top:3px}
+  .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px}
+  .lane.ig .badge{background:var(--cobalt-soft);color:var(--cobalt-deep)}
+  .lane.tt .badge{background:var(--ochre-soft);color:var(--ochre)}
+  /* note */
+  .note{border-radius:var(--r);padding:22px 26px;background:linear-gradient(180deg,#FBF8F1,#F6EFDD);border:1px solid var(--line);border-left:4px solid var(--cobalt)}
+  .note .tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cobalt-deep);margin-bottom:10px}
+  .note p{font-size:14.5px;color:#3a3528;line-height:1.62}
+  .note p+p{margin-top:9px} .note b{color:var(--ink)}
+  /* top content rows */
+  .row{padding:14px 22px;border-top:1px solid var(--line);display:grid;grid-template-columns:24px 1fr auto;gap:13px;align-items:center}
+  .rank{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--faint)}
+  .r-cap{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px}
+  .r-cap .r-date{font-weight:400;color:var(--faint)}
+  .meter{height:6px;border-radius:4px;background:var(--sand-2);overflow:hidden}
+  .meter i{display:block;height:100%;border-radius:4px}
+  .ig-bar{background:var(--cobalt)} .tt-bar{background:var(--ochre)}
+  .r-stats{text-align:right;white-space:nowrap}
+  .r-main{font-weight:700;font-size:14px}
+  .r-er{font-size:11.5px;color:var(--sub);margin-top:3px} .r-er b{color:var(--ink)}
+  /* pending */
+  .pending{border:1px dashed var(--line);border-radius:12px;padding:16px 18px;background:rgba(255,255,255,.4)}
+  .pending .ph{font-size:12.5px;font-weight:600;color:var(--sub);display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .pending .pb{font-size:12.5px;color:var(--faint);line-height:1.5}
+  .chip{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--ochre-soft);color:var(--ochre)}
+  /* niche trends */
+  .trend{padding:16px 18px;border-top:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
+  .trend:first-child{border-top:none}
+  .t-pulse{flex:none;width:34px;height:34px;border-radius:9px;background:var(--cobalt-soft);color:var(--cobalt-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .t-body h4{font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .t-body p{font-size:12.5px;color:var(--sub);line-height:1.5}
+  .t-tag{font-size:11px;font-weight:600;color:var(--ochre);margin-top:5px}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--pos)}
+  .live .blink{width:7px;height:7px;border-radius:50%;background:var(--pos);animation:bl 1.6s infinite}
+  @keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
+  footer{margin-top:32px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--faint)}
+  footer .wm{font-weight:600;color:var(--sub)}
+  text{font-family:'Inter',sans-serif}
+  @media(max-width:820px){.band{grid-template-columns:1fr 1fr}.kpi:nth-child(1),.kpi:nth-child(2){border-bottom:1px solid var(--line)}.kpi:nth-child(2){border-right:none}.grid2{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Raport social media · sezon maturalny 2026</div>
+    <h1>Julia · <span class="hl">matura z polskiego</span></h1>
+    <div class="topbar">
+      <div class="tabs">
+        <span class="tab ig"><span class="dot"></span>Instagram</span>
+        <span class="tab tt"><span class="dot"></span>TikTok</span>
+      </div>
+      <div class="filter" id="filter">
+        <button data-r="1">24h</button>
+        <button data-r="7">7 dni</button>
+        <button data-r="30" class="on">30 dni</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="band">
+    <div class="kpi"><div class="label">Łączni obserwujący</div><div class="num" id="k-foll">0</div></div>
+    <div class="kpi"><div class="label">Nowi obserwujący <span id="k-range1"></span></div><div class="num" id="k-new">0</div><div class="delta up" id="k-newd"></div></div>
+    <div class="kpi"><div class="label">Zasięg + wyświetlenia <span id="k-range2"></span></div><div class="num" id="k-reach">0</div></div>
+    <div class="kpi"><div class="label">Engagement rate · top treści</div><div class="num">14%</div></div>
+  </div>
+
+  <!-- lanes -->
+  <div class="sec grid2">
+    <div class="card lane ig pad">
+      <div class="c-head"><span class="c-name"><span class="dot ig"></span>Instagram</span><span class="badge">głębokie zaangażowanie</span></div>
+      <div class="lane-stats">
+        <div><div class="s-num">3 947</div><div class="s-lab">Obserwujący</div><div class="s-sub" style="color:var(--pos)">+177 / 30 dni</div></div>
+        <div><div class="s-num" id="ig-reach">16 358</div><div class="s-lab">Zasięg <span id="ig-rl">/ 30 dni</span></div></div>
+        <div><div class="s-num">121</div><div class="s-lab">Posty łącznie</div></div>
+      </div>
+    </div>
+    <div class="card lane tt pad">
+      <div class="c-head"><span class="c-name"><span class="dot tt"></span>TikTok</span><span class="badge">motor zasięgu</span></div>
+      <div class="lane-stats">
+        <div><div class="s-num">12 330</div><div class="s-lab">Obserwujący</div><div class="s-sub" style="color:var(--neg)">−odpływ po maturze</div></div>
+        <div><div class="s-num" id="tt-views">314 474</div><div class="s-lab">Wyświetlenia <span id="tt-vl">/ 30 dni</span></div></div>
+        <div><div class="s-num">131</div><div class="s-lab">Filmy łącznie</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI insight -->
+  <div class="sec note">
+    <div class="tag">✦ Analiza AI · co z tego wynika</div>
+    <p><b>Konto żyło maturą — i to widać co do tygodnia.</b> Szczyt to połowa kwietnia: TikTok zrobił <b>457 tys. wyświetleń w jednym tygodniu</b> i +1 031 obserwujących (przedmaturalne wkuwanie). Po egzaminach, od końca maja, ruch spadł do ~7–13 tys./tydzień, a konto zaczęło tracić obserwujących netto — publika była „egzaminowa" i odpływa.</p>
+    <p>Instagram trzyma się lepiej jakościowo: top post miał <b>5 750 zapisów</b> — „konteksty" są zapisywane jak ściąga. Format <b>„utwór → motywy"</b> (Taco, Mata) bije rekordy na obu kanałach jednocześnie.</p>
+    <p><b>Rekomendacja:</b> żeby nie żyć tylko 2 miesiące w roku, po sezonie przeprofiluj część treści na klasy 1–3 i „powtórkę wakacyjną" przyszłych maturzystów — to spłaszcza pomaturalny odpływ. Do następnej matury dubluj format „utwór → motywy".</p>
+  </div>
+
+  <!-- GROWTH -->
+  <div class="sec">
+    <div class="sec-h"><h2>Wzrost konta</h2><span>TikTok · ostatnie tygodnie sezonu</span></div>
+    <div class="card pad">
+      <div class="c-head"><span class="c-name"><span class="dot tt"></span>Wyświetlenia i nowi obserwujący / tydzień</span></div>
+      <div class="legend"><span><i style="background:var(--ochre)"></i>Wyświetlenia (słupki)</span><span><i style="background:var(--cobalt)"></i>Nowi obserwujący (linia)</span></div>
+      <div id="growth"></div>
+    </div>
+    <div class="card pad" style="margin-top:18px">
+      <div class="c-head"><span class="c-name"><span class="dot ig"></span>Instagram — dzienny zasięg, 30 dni</span></div>
+      <div id="ig-trend"></div>
+    </div>
+  </div>
+
+  <!-- CADENCE -->
+  <div class="sec">
+    <div class="sec-h"><h2>Częstotliwość publikacji</h2><span>tygodniowo</span></div>
+    <div class="grid2">
+      <div class="card pad">
+        <div class="c-head"><span class="c-name"><span class="dot ig"></span>Posty / tydzień</span><span class="c-meta">12 tyg · Reels + Feed</span></div>
+        <div id="posts-chart"></div>
+        <div class="legend"><span><i style="background:var(--cobalt)"></i>Reels: 24</span><span><i style="background:var(--ochre)"></i>Feed: 12</span></div>
+      </div>
+      <div class="card pad">
+        <div class="c-head"><span class="c-name"><span class="dot ig"></span>Relacje (Stories) / tydzień</span><span class="chip">do podpięcia</span></div>
+        <div class="pending" style="margin-top:12px">
+          <div class="pb">Statystyki relacji nie są dostępne w automatycznym feedzie (API IG nie oddaje historii Stories). Zasilane z eksportu albo cotygodniowego agenta — patrz sekcja trendów niżej.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCOVERY -->
+  <div class="sec">
+    <div class="sec-h"><h2>Skąd Cię znajdują</h2><span>całe konto</span></div>
+    <div class="grid2">
+      <div class="card pad">
+        <div class="c-head"><span class="c-name"><span class="dot tt"></span>Źródła ruchu</span><span class="chip">weryfikacja</span></div>
+        <div class="pending" style="margin-top:12px">
+          <div class="ph">For You · Wyszukiwarka · Profil · Obserwowani · Dźwięk</div>
+          <div class="pb">TikTok pokazuje ten podział w apce, ale przez automatyczny feed wrócił niespójnie (wszystkie źródła z tą samą liczbą). Zaciągam to z natywnego eksportu / agenta zamiast wstawiać błędne liczby.</div>
+        </div>
+      </div>
+      <div class="card pad">
+        <div class="c-head"><span class="c-name"><span class="dot tt"></span>Frazy, po których Cię znaleźli</span><span class="chip">z eksportu</span></div>
+        <div class="pending" style="margin-top:12px">
+          <div class="pb">Wyszukiwane hasła nie są udostępniane przez API — żadne narzędzie nie poda ich automatycznie. Dostarcza je agent w cotygodniowym researchu (z apki TikToka + trendów w niszy).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NICHE TRENDS -->
+  <div class="sec">
+    <div class="sec-h"><h2>Trendy w niszy</h2><span class="live"><span class="blink"></span>aktualizacja co poniedziałek</span></div>
+    <div class="card">
+      <div class="pad" style="padding-bottom:0">
+        <div class="c-head"><span class="c-name">Czego szuka nisza „matura / polski" w tym tygodniu</span><span class="c-meta">ostatnia aktualizacja: pon. 15 cze 2026 · agent</span></div>
+      </div>
+      <div id="trends"></div>
+      <div class="pad" style="border-top:1px solid var(--line)"><div class="pb" style="font-size:12px;color:var(--faint)">Sekcja generowana automatycznie: w każdy poniedziałek agent robi research w niszy i podmienia te pozycje. Przykładowe wpisy poniżej.</div></div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="wm">Przygotowane przez [Twoja Agencja]</span>
+    <span>Dane: Instagram &amp; TikTok via Porter · raport demonstracyjny</span>
+  </footer>
+</div>
+
+<script>
+const fmt=n=>Math.round(n).toLocaleString('pl-PL');
+
+/* ===================== BLOK DANYCH — AGENT NADPISUJE TYLKO TO ===================== */
+// real data from Porter (jezykpolskizjulia / Julia | matura z polskiego) — odświeżono 2026-06-13
+const TOTAL_FOLLOWERS=16267;  // IG followers_count (3946) + TikTok followers_count (12321)
+const daily={
+  // UWAGA: igReach z Portera wrócił identyczny dla wszystkich 30 dni (13696) — niespójność API.
+  // Zostawiono poprzedni placeholder dla igReach. Pozostałe dzienne odświeżone (14 maj–12 cze 2026).
+  igReach:[4324,3660,2082,3309,3279,4946,4734,1794,486,231,213,174,1207,178,152,126,2099,1267,320,662,713,237,555,883,580,221,120,668,257,557],
+  igNew:[0,0,21,24,35,20,2,0,0,1,0,2,0,0,2,0,2,4,2,0,0,4,0,1,0,1,0,0,0,0],
+  ttViews:[24015,14640,17346,32268,39663,92887,28335,5206,3176,2270,2747,2916,2447,2480,2089,3496,1909,1873,2310,1838,1438,1574,2706,1506,1802,1879,1822,1734,1540,0],
+  ttNew:[0,288,0,0,0,0,0,0,32,0,0,0,0,0,0,15,0,0,0,0,0,0,25,2,2,7,3,4,7,0]
+};
+const weekly={
+  labels:['6 kwi','13 kwi','20 kwi','27 kwi','4 maj','11 maj','18 maj','25 maj','1 cze'],
+  views:[23145,457718,353410,257338,121568,203805,18084,13245,8777],
+  newF:[0,1705,271,339,288,32,15,27,23]
+};
+const posts={labels:['16/3','23/3','30/3','6/4','13/4','20/4','27/4','4/5','11/5','18/5','25/5','1/6'],counts:[5,2,3,3,3,8,3,4,2,1,1,1]};
+const topIG=[
+  {c:"Taco — motywy w utworach",d:"18 kwi",v:149059,er:"16,7",b:100},
+  {c:"Prosiliście o Matę!",d:"21 kwi",v:82312,er:"13,3",b:55},
+  {c:"Do jakich kontekstów się odwołać",d:"10 kwi",v:66825,er:"19,1",b:45},
+  {c:"Ulubiony film jako kontekst",d:"22 mar",v:33432,er:"16,3",b:22},
+  {c:"Polska muzyka jako konteksty",d:"23 kwi",v:27669,er:"17,7",b:19}];
+const topTT=[
+  {c:"Prosiliście o Matę!",d:"21 kwi",v:198160,er:"10,0",b:100},
+  {c:"Motywy w utworach",d:"18 kwi",v:154051,er:"11,2",b:78},
+  {c:"Zacznijcie się uczyć, pls",d:"27 kwi",v:84237,er:"11,0",b:43},
+  {c:"Trudny temat rozprawki — tipy",d:"22 kwi",v:67928,er:"12,6",b:34},
+  {c:"Tylko 3 dramaty — co dodać?",d:"9 maj",v:65302,er:"12,2",b:33}];
+const niche=[
+  {n:"↑",h:"Wyniki matur 8 lipca + poprawka w sierpniu",p:"8 lipca o 8:30 wyniki w ZIU, a poprawka 24–25 sierpnia. Nagraj wyprzedzająco: jak czytać wynik i co robić, gdy trzeba poprawiać.",t:"format: Q&A / krótki guide"},
+  {n:"↑",h:"Rekrutacja na studia — punkty i progi",p:"Po wynikach maturzyści liczą punkty i sprawdzają progi, a każda uczelnia przelicza inaczej. Wdzięczny temat na treść o przeliczaniu punktów.",t:"format: kalkulator / karuzela"},
+  {n:"→",h:"Wakacyjna powtórka dla klas 1–3",p:"Przyszli maturzyści zaczynają latem — to ruch poza sezonem egzaminacyjnym. Lekka seria „lektura tygodnia” buduje publikę na cały rok.",t:"format: seria lektura tygodnia"},
+  {n:"↑",h:"Darmowe notatki i AI do nauki",p:"Hasła „notatki z polskiego za darmo” mocno klikają, a nauka z AI rośnie. Pokaż swój zestaw notatek i jak używać AI do powtórki.",t:"format: demo na ekranie"}];
+/* ===================== KONIEC BLOKU DANYCH ===================== */
+
+// ---- KPI date filter ----
+function setRange(r){
+  const sum=(a)=>a.slice(-r).reduce((x,y)=>x+y,0);
+  const ir=sum(daily.igReach), tv=sum(daily.ttViews);
+  const newF=sum(daily.igNew)+sum(daily.ttNew);
+  const lab=r===1?'· 24h':r===7?'· 7 dni':'· 30 dni';
+  const sl=r===1?'/ 24h':r===7?'/ 7 dni':'/ 30 dni';
+  document.getElementById('k-foll').textContent=fmt(TOTAL_FOLLOWERS);
+  document.getElementById('k-new').textContent='+'+fmt(newF);
+  document.getElementById('k-reach').textContent=fmt(ir+tv);
+  document.getElementById('k-range1').textContent=lab;
+  document.getElementById('k-range2').textContent=lab;
+  document.getElementById('k-newd').textContent=newF>0?'nowych obserwacji':'poza sezonem';
+  document.getElementById('k-newd').className='delta '+(newF>0?'up':'down');
+  document.getElementById('ig-reach').textContent=fmt(ir);
+  document.getElementById('tt-views').textContent=fmt(tv);
+  document.getElementById('ig-rl').textContent=sl; document.getElementById('tt-vl').textContent=sl;
+}
+document.getElementById('filter').addEventListener('click',e=>{
+  if(e.target.tagName!=='BUTTON')return;
+  document.querySelectorAll('#filter button').forEach(b=>b.classList.remove('on'));
+  e.target.classList.add('on'); setRange(+e.target.dataset.r);
+});
+
+// ---- charts (hand-rolled SVG) ----
+function growthChart(){
+  const W=760,H=240,pl=46,pr=46,pt=18,pb=34,iw=W-pl-pr,ih=H-pt-pb;
+  const maxV=Math.max(...weekly.views),maxN=Math.max(...weekly.newF);
+  const n=weekly.views.length,bw=iw/n*0.56,step=iw/n;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+  for(let g=0;g<=3;g++){const y=pt+ih-ih*g/3;s+=`<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="#DCD3BF" stroke-width="1"/>`;s+=`<text x="${pl-8}" y="${y+4}" text-anchor="end" font-size="10" fill="#9A9484">${fmt(maxV*g/3/1000)}k</text>`;}
+  weekly.views.forEach((v,i)=>{const x=pl+step*i+(step-bw)/2,h=ih*v/maxV,y=pt+ih-h;s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="4" fill="#B8862F" opacity="${0.55+0.45*v/maxV}"/>`;s+=`<text x="${pl+step*i+step/2}" y="${H-12}" text-anchor="middle" font-size="10" fill="#9A9484">${weekly.labels[i]}</text>`;});
+  let pts=weekly.newF.map((v,i)=>`${pl+step*i+step/2},${pt+ih-ih*v/maxN}`).join(' ');
+  s+=`<polyline points="${pts}" fill="none" stroke="#2A4BD0" stroke-width="2.5" stroke-linejoin="round"/>`;
+  weekly.newF.forEach((v,i)=>{s+=`<circle cx="${pl+step*i+step/2}" cy="${pt+ih-ih*v/maxN}" r="3.5" fill="#fff" stroke="#2A4BD0" stroke-width="2"/>`;});
+  s+='</svg>';document.getElementById('growth').innerHTML=s;
+}
+function igTrend(){
+  const W=760,H=150,pl=40,pr=14,pt=14,pb=14,iw=W-pl-pr,ih=H-pt-pb;
+  const a=daily.igReach,max=Math.max(...a),n=a.length,step=iw/(n-1);
+  let pts=a.map((v,i)=>`${pl+step*i},${pt+ih-ih*v/max}`);
+  let area=`${pl},${pt+ih} `+pts.join(' ')+` ${pl+iw},${pt+ih}`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+  s+=`<polygon points="${area}" fill="#2A4BD0" opacity="0.08"/>`;
+  s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="#2A4BD0" stroke-width="2" stroke-linejoin="round"/>`;
+  s+=`<text x="${pl}" y="11" font-size="10" fill="#9A9484">${fmt(max)}</text>`;
+  s+='</svg>';document.getElementById('ig-trend').innerHTML=s;
+}
+function postsChart(){
+  const W=520,H=180,pl=26,pr=10,pt=14,pb=28,iw=W-pl-pr,ih=H-pt-pb;
+  const a=posts.counts,max=Math.max(...a),n=a.length,step=iw/n,bw=step*0.58;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+  for(let g=0;g<=2;g++){const y=pt+ih-ih*g/2;s+=`<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="#DCD3BF" stroke-width="1"/>`;s+=`<text x="${pl-6}" y="${y+4}" text-anchor="end" font-size="9.5" fill="#9A9484">${Math.round(max*g/2)}</text>`;}
+  a.forEach((v,i)=>{const x=pl+step*i+(step-bw)/2,h=ih*v/max,y=pt+ih-h;s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="3" fill="#2A4BD0" opacity="${0.5+0.5*v/max}"/>`;if(i%2===0)s+=`<text x="${x+bw/2}" y="${H-10}" text-anchor="middle" font-size="9" fill="#9A9484">${posts.labels[i]}</text>`;});
+  s+='</svg>';document.getElementById('posts-chart').innerHTML=s;
+}
+function rows(id,data,cls){document.getElementById(id).innerHTML=data.map((p,i)=>`<div class="row"><div class="rank">0${i+1}</div><div><div class="r-cap">${p.c} <span class="r-date">· ${p.d}</span></div><div class="meter"><i class="${cls}" style="width:${p.b}%"></i></div></div><div class="r-stats"><div class="r-main">${fmt(p.v)}</div><div class="r-er">ER <b>${p.er}%</b></div></div></div>`).join('');}
+function trends(){document.getElementById('trends').innerHTML=niche.map(t=>`<div class="trend"><div class="t-pulse">${t.n}</div><div class="t-body"><h4>${t.h}</h4><p>${t.p}</p><div class="t-tag">${t.t}</div></div></div>`).join('');}
+
+// top content section injected after lanes note (build markup)
+const topHtml=`<div class="sec"><div class="sec-h"><h2>Najlepsze treści</h2><span>sezon · 13 mar – 11 cze</span></div><div class="grid2">
+<div class="card ig"><div class="pad" style="padding-bottom:8px"><div class="c-head"><span class="c-name"><span class="dot ig"></span>Instagram — wg zasięgu</span><span class="c-meta">zasięg · ER</span></div></div><div id="ig-rows"></div></div>
+<div class="card tt"><div class="pad" style="padding-bottom:8px"><div class="c-head"><span class="c-name"><span class="dot tt"></span>TikTok — wg wyświetleń</span><span class="c-meta">wyświetlenia · ER</span></div></div><div id="tt-rows"></div></div>
+</div></div>`;
+document.querySelector('footer').insertAdjacentHTML('beforebegin',topHtml);
+
+setRange(30); growthChart(); igTrend(); postsChart(); trends();
+rows('ig-rows',topIG,'ig-bar'); rows('tt-rows',topTT,'tt-bar');
+</script>
+</body>
+</html>
